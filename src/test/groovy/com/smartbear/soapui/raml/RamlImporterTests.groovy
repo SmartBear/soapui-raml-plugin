@@ -16,7 +16,6 @@
 
 package com.smartbear.soapui.raml
 
-import com.eviware.soapui.SoapUI
 import com.eviware.soapui.impl.rest.RestRequestInterface
 import com.eviware.soapui.impl.rest.RestService
 import com.eviware.soapui.impl.rest.mock.RestMockAction
@@ -103,7 +102,7 @@ class RamlImporterTests extends GroovyTestCase{
     public static def importRaml( def path )
     {
         WsdlProject project = new WsdlProject()
-        RamlImporter importer = new RamlImporter( project )
+        RamlV08Importer importer = new RamlV08Importer( project )
         importer.setRestMockService( project.addNewRestMockService( "TestRESTMock"))
         importer.setCreateSampleRequests( true )
 

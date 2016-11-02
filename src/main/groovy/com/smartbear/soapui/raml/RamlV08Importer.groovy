@@ -42,7 +42,7 @@ import org.raml.parser.visitor.RamlDocumentBuilder
  * @author Ole Lensmar
  */
 
-class RamlImporter {
+class RamlV08Importer {
 
     private static final String MEDIA_TYPE_EXTENSION = "{mediaTypeExtension}"
     private final WsdlProject project
@@ -52,7 +52,7 @@ class RamlImporter {
     private RestMockService restMockService
     private boolean createSampleRequests
 
-    public RamlImporter(WsdlProject project) {
+    public RamlV08Importer(WsdlProject project) {
         this.project = project
     }
 
