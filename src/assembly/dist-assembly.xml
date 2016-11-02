@@ -10,6 +10,7 @@
             <outputDirectory>/lib</outputDirectory>
             <includes>
                 <include>org.raml:raml-parser</include>
+                <include>org.raml:raml-parser-2</include>
                 <include>org.yaml:snakeyaml</include>
                 <include>com.googlecode.juniversalchardet:juniversalchardet</include>
                 <include>org.glassfish:javax.json</include>
