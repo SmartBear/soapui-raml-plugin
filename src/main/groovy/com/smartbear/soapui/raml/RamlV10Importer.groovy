@@ -13,7 +13,7 @@ import com.eviware.soapui.impl.rest.support.RestParameter
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle
 import com.eviware.soapui.impl.rest.support.RestUtils
 import com.eviware.soapui.impl.wsdl.WsdlProject
-import com.smartbear.ready.core.ReadyApiCoreModule
+import com.eviware.soapui.support.StringUtils
 import org.apache.xmlbeans.XmlBoolean
 import org.apache.xmlbeans.XmlDate
 import org.apache.xmlbeans.XmlDouble
@@ -21,14 +21,14 @@ import org.apache.xmlbeans.XmlInteger
 import org.apache.xmlbeans.XmlString
 import org.raml.v2.api.RamlModelBuilder
 import org.raml.v2.api.RamlModelResult
-import org.raml.v2.api.model.v10.bodies.Response
-import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.api.Api
 import org.raml.v2.api.model.v10.bodies.MimeType
+import org.raml.v2.api.model.v10.bodies.Response
 import org.raml.v2.api.model.v10.datamodel.IntegerTypeDeclaration
 import org.raml.v2.api.model.v10.datamodel.NumberTypeDeclaration
 import org.raml.v2.api.model.v10.datamodel.StringTypeDeclaration
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration
+import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.resources.Resource
 import org.raml.v2.internal.impl.v10.grammar.BuiltInScalarType
 
@@ -51,7 +51,7 @@ class RamlV10Importer {
 
     public RestService importRaml(String url) {
         RamlModelResult ramlModelResult = new RamlModelBuilder().buildApi(url)
-        if(ramlModelResult.hasErrors()) {
+        if (ramlModelResult.hasErrors()) {
             ramlModelResult.getValidationResults().each {
                 SoapUI.log.error(it.getMessage())
             }
@@ -63,12 +63,11 @@ class RamlV10Importer {
     }
 
     public RestService importRaml(Api api) {
-
         def restService = createRestService(api)
 
-        baseUriParams = extractUriParams(api.baseUri(), api.baseUriParameters())
+        baseUriParams = extractUriParams(api.baseUri().value(), api.baseUriParameters())
         if (baseUriParams.version != null) {
-            baseUriParams.version.defaultValue = api.version()
+            baseUriParams.version.defaultValue = api.version()?.value()
         }
 
         // extract default media type
@@ -95,7 +94,6 @@ class RamlV10Importer {
     }
 
     def addResource(RestService restService, String path, Resource resource) {
-
         def restResource = restService.addNewResource(getResourceName(resource), path)
         initResource(restResource, resource)
 
@@ -105,7 +103,7 @@ class RamlV10Importer {
     }
 
     String getResourceName(Resource resource) {
-        String name = resource.displayName()
+        String name = resource.displayName().value()
 
         if (name == null) {
             name = resource.relativeUri().value()
@@ -133,7 +131,6 @@ class RamlV10Importer {
     }
 
     def initResource(RestResource restResource, Resource resource) {
-
         restResource.description = resource.description()
         if (resource.relativeUri().value().contains(MEDIA_TYPE_EXTENSION)) {
             RestParameter extParameter = restResource.params.addProperty("ext")
@@ -142,7 +139,7 @@ class RamlV10Importer {
             extParameter.defaultValue = "." + defaultMediaTypeExtension
         }
 
-        def params = extractUriParams(resource.relativeUri(), resource.uriParameters())
+        def params = extractUriParams(resource.relativeUri().value(), resource.uriParameters())
         params.putAll(baseUriParams)
         params.each {
             addParamFromNamedProperty(restResource.params, ParameterStyle.TEMPLATE, it.value)
@@ -150,12 +147,13 @@ class RamlV10Importer {
 
         // workaround for bug in SoapUI that adds template parameters to path
         baseUriParams.each {
-            restResource.path = restResource.path.replaceAll("\\{" + it.key + "\\}", "");
+            restResource.path = restResource.path.replaceAll("\\{" + it.key + "\\}", "")
         }
 
-        resource.methods()?.each {
+        List<Method> methods = resource.methods()
+        methods.each {
             def key = it.method()
-            if (Arrays.asList(RestRequestInterface.HttpMethod.methodsAsStringArray).contains(key)) {
+            if (Arrays.asList(RestRequestInterface.HttpMethod.methodsAsStringArray).contains(key.toUpperCase())) {
                 def restMethod = restResource.getRestMethodByName(key)
                 if (restMethod == null) {
                     restMethod = restResource.addNewMethod(key.toLowerCase())
@@ -206,15 +204,6 @@ class RamlV10Importer {
             def representation = restMethod.addNewRepresentation(RestRepresentation.Type.REQUEST)
             representation.mediaType = it.name()
 
-            /*if (representation.mediaType.equals("application/x-www-form-urlencoded") ||
-                    representation.mediaType.equals("multipart/form-data")) {
-                it.formParameters()?.each {
-                    def name = it.key
-                    if (it.value.size() > 0)
-                        addParamFromNamedProperty(restMethod.params, ParameterStyle.QUERY, name, it.value.get(0))
-                }
-            }*/
-
             representation.sampleContent = it.example()?.value()
 
             if (it.example() != null && createSampleRequests) {
@@ -225,44 +214,39 @@ class RamlV10Importer {
         }
     }
 
-    private RestParameter addParamFromNamedProperty(def params, def style, RamlParameter uriParameter) {
-
-        RestParameter param = params.getProperty(uriParameter.name())
+    private RestParameter addParamFromNamedProperty(def params, def style, RamlParameter ramlParameter) {
+        RestParameter param = params.getProperty(ramlParameter.name)
         if (param == null) {
-            param = params.addProperty(uriParameter.name())
+            param = params.addProperty(ramlParameter.name)
         }
 
         param.style = style
 
         if (param.description == null || param.description == "") {
-            param.description = uriParameter.description
+            param.description = ramlParameter.description
         }
 
         if (param.defaultValue == null || param.defaultValue == "") {
-            param.defaultValue = uriParameter.defaultValue
+            param.defaultValue = ramlParameter.defaultValue
         }
 
-        param.required = uriParameter.required()
+        param.required = ramlParameter.required
 
         if (param.options == null || param.options.length == 0) {
-            if (uriParameter instanceof StringTypeDeclaration) {
-                param.options = ((StringTypeDeclaration) uriParameter).enumValues()
-            } else if (uriParameter instanceof NumberTypeDeclaration) {
-                param.options = ((NumberTypeDeclaration) uriParameter).enumValues()
-            }
+            param.options = ramlParameter.enumValues()
         }
 
         if (param.type == null) {
             param.type = XmlString.type.name
         }
 
-        if (uriParameter.type().equals(BuiltInScalarType.NUMBER.getType())) {
+        if (ramlParameter.type.equals(BuiltInScalarType.NUMBER.getType())) {
             param.type = XmlDouble.type.name
-        } else if (uriParameter.type().equals(BuiltInScalarType.INTEGER.getType())) {
+        } else if (ramlParameter.type.equals(BuiltInScalarType.INTEGER.getType())) {
             param.type = XmlInteger.type.name
-        } else if (uriParameter.type().equals(BuiltInScalarType.BOOLEAN.getType())) {
+        } else if (ramlParameter.type.equals(BuiltInScalarType.BOOLEAN.getType())) {
             param.type = XmlBoolean.type.name
-        } else if (isDateTimeType(uriParameter.type)) {
+        } else if (isDateTimeType(ramlParameter.type)) {
             param.type = XmlDate.type.name
         }
 
@@ -276,7 +260,6 @@ class RamlV10Importer {
 
     private addResponses(RestMethod method, List<Response> responses) {
         responses?.each {
-
             int statusCode = Integer.parseInt(it.code().value())
 
             if (it.body() == null || it.body().isEmpty()) {
@@ -293,8 +276,7 @@ class RamlV10Importer {
                     representation.status = representation.status + statusCode
                 }
 
-                representation.description = it.description().value()
-
+                representation.description = it.description()?.value()
             } else it.body()?.each {
                 TypeDeclaration declaration = it
                 def representation = method.representations.find {
@@ -311,8 +293,8 @@ class RamlV10Importer {
                     representation.status = representation.status + statusCode
                 }
 
-                representation.description = it.description()
-                representation.sampleContent = it.example().value()
+                representation.description = it.description()?.value()
+                representation.sampleContent = it.example()?.value()
             }
         }
 
@@ -334,7 +316,6 @@ class RamlV10Importer {
             def mockAction = restMockService.addEmptyMockAction(method.method, path)
 
             responses?.each {
-
                 int statusCode = Integer.parseInt(it.code().value())
                 it.body()?.each {
                     def mockResponse = mockAction.addNewMockResponse("Response " + statusCode)
@@ -345,27 +326,53 @@ class RamlV10Importer {
                     }
                 }
             }
-
         }
     }
 
     private RestService createRestService(Api api) {
-        RestService restService = project.addNewInterface(api.title(), RestServiceFactory.REST_TYPE)
+        RestService restService = project.addNewInterface(api.title().value(), RestServiceFactory.REST_TYPE)
 
-        def path = api.baseUri()
+        def path = api.baseUri().value()
         if (path != null) {
             if (path.endsWith("/")) {
                 path = path.substring(0, path.length() - 1)
             }
 
-            URL url = new URL(path)
-            def pathPos = path.length() - url.path.length()
-
-            restService.basePath = path.substring(pathPos)
-            restService.addEndpoint(path.substring(0, pathPos))
+            List<String> protocols = api.protocols()
+            if ((protocols != null) && (!protocols.isEmpty())) {
+                protocols.each {
+                    addEndpoint(restService, it.toLowerCase(), path)
+                }
+            } else {
+                addEndpoint(restService, path)
+            }
         }
 
         return restService
+    }
+
+    private void addEndpoint(RestService restService, String protocol, String path) {
+        String endpointPath = path
+        if (StringUtils.hasContent(protocol)) {
+            final String regex = "^(http)|(https)://"
+            if (StringUtils.hasContent(path.find(regex))) {
+                endpointPath = path.replaceFirst(regex, protocol)
+            } else {
+                endpointPath = String.format("%s://%s", protocol, path)
+            }
+        }
+
+        URL url = new URL(endpointPath)
+        def pathPos = endpointPath.length() - url.path.length()
+
+        if (!StringUtils.hasContent(restService.basePath)) {
+            restService.basePath = endpointPath.substring(pathPos)
+        }
+        restService.addEndpoint(endpointPath.substring(0, pathPos))
+    }
+
+    private void addEndpoint(RestService restService, String path) {
+        addEndpoint(restService, null, path)
     }
 
     private Map extractUriParams(def path, def uriParameters) {
@@ -401,9 +408,9 @@ class RamlV10Importer {
 
         public RamlParameter(TypeDeclaration parameter) {
             this.parameter = parameter
-            type = parameter != null? parameter.type() : BuiltInScalarType.STRING.getType();
+            type = parameter != null ? parameter.type() : BuiltInScalarType.STRING.getType();
             name = parameter?.name()
-            description = parameter?.description().value()
+            description = parameter?.description()?.value()
             defaultValue = parameter?.defaultValue()
             required = parameter?.required()
         }
@@ -452,12 +459,12 @@ class RamlV10Importer {
 
         List<String> enumValues() {
             if (parameter == null) {
-                return  null
+                return null
             }
 
-            if(parameter instanceof StringTypeDeclaration) {
+            if (parameter instanceof StringTypeDeclaration) {
                 return ((StringTypeDeclaration) parameter).enumValues()
-            } else if((parameter instanceof NumberTypeDeclaration) || (parameter instanceof IntegerTypeDeclaration)) {
+            } else if ((parameter instanceof NumberTypeDeclaration) || (parameter instanceof IntegerTypeDeclaration)) {
                 return ((NumberTypeDeclaration) parameter).enumValues()
             }
 
