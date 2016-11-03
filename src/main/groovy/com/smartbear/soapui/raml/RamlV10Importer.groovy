@@ -8,7 +8,6 @@ import com.eviware.soapui.impl.rest.RestRequestInterface
 import com.eviware.soapui.impl.rest.RestResource
 import com.eviware.soapui.impl.rest.RestService
 import com.eviware.soapui.impl.rest.RestServiceFactory
-import com.eviware.soapui.impl.rest.mock.RestMockService
 import com.eviware.soapui.impl.rest.support.RestParameter
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle
 import com.eviware.soapui.impl.rest.support.RestUtils
@@ -32,23 +31,19 @@ import org.raml.v2.api.model.v10.methods.Method
 import org.raml.v2.api.model.v10.resources.Resource
 import org.raml.v2.internal.impl.v10.grammar.BuiltInScalarType
 
-class RamlV10Importer {
+class RamlV10Importer extends AbstractRamlImporter {
     private static final String MEDIA_TYPE_EXTENSION = "{ext}"
-    private final WsdlProject project
+
     private List<String> defaultMediaTypes
     private String defaultMediaTypeExtension
     private def baseUriParams = [:]
-    private RestMockService restMockService
-    private boolean createSampleRequests
+
 
     public RamlV10Importer(WsdlProject project) {
-        this.project = project
+        super(project)
     }
 
-    public void setRestMockService(RestMockService restMockService) {
-        this.restMockService = restMockService
-    }
-
+    @Override
     public RestService importRaml(String url) {
         RamlModelResult ramlModelResult = new RamlModelBuilder().buildApi(url)
         if (ramlModelResult.hasErrors()) {
@@ -93,7 +88,7 @@ class RamlV10Importer {
         return restService
     }
 
-    def addResource(RestService restService, String path, Resource resource) {
+    private def addResource(RestService restService, String path, Resource resource) {
         def restResource = restService.addNewResource(getResourceName(resource), path)
         initResource(restResource, resource)
 
@@ -102,7 +97,7 @@ class RamlV10Importer {
         }
     }
 
-    String getResourceName(Resource resource) {
+    private String getResourceName(Resource resource) {
         String name = resource.displayName().value()
 
         if (name == null) {
@@ -116,7 +111,7 @@ class RamlV10Importer {
         return name
     }
 
-    def addChildResource(RestResource restResource, String path, Resource resource) {
+    private def addChildResource(RestResource restResource, String path, Resource resource) {
         def childResource = restResource.addNewChildResource(getResourceName(resource), path)
 
         initResource(childResource, resource)
@@ -130,7 +125,7 @@ class RamlV10Importer {
         }
     }
 
-    def initResource(RestResource restResource, Resource resource) {
+    private def initResource(RestResource restResource, Resource resource) {
         restResource.description = resource.description()
         if (resource.relativeUri().value().contains(MEDIA_TYPE_EXTENSION)) {
             RestParameter extParameter = restResource.params.addProperty("ext")
@@ -165,7 +160,7 @@ class RamlV10Importer {
         }
     }
 
-    public void initMethod(RestMethod restMethod, Method method) {
+    private void initMethod(RestMethod restMethod, Method method) {
         restMethod.description = method.description().value()
 
         method.queryParameters()?.each {
@@ -189,7 +184,7 @@ class RamlV10Importer {
         }
     }
 
-    RestRequest initDefaultRequest(RestRequest restRequest) {
+    private RestRequest initDefaultRequest(RestRequest restRequest) {
         if (defaultMediaTypes != null) {
             def headers = restRequest.requestHeaders
             headers.Accept = defaultMediaTypes.toArray()
@@ -394,9 +389,6 @@ class RamlV10Importer {
         return uriParams
     }
 
-    public void setCreateSampleRequests(boolean createSampleRequests) {
-        this.createSampleRequests = createSampleRequests;
-    }
 
     private class RamlParameter {
         private final TypeDeclaration parameter
