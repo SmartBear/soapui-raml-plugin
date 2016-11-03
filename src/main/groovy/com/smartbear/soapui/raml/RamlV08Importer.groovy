@@ -16,13 +16,22 @@
 
 package com.smartbear.soapui.raml
 
-import com.eviware.soapui.impl.rest.*
-import com.eviware.soapui.impl.rest.mock.RestMockService
+import com.eviware.soapui.impl.rest.RestMethod
+import com.eviware.soapui.impl.rest.RestRepresentation
+import com.eviware.soapui.impl.rest.RestRequest
+import com.eviware.soapui.impl.rest.RestRequestInterface
+import com.eviware.soapui.impl.rest.RestResource
+import com.eviware.soapui.impl.rest.RestService
+import com.eviware.soapui.impl.rest.RestServiceFactory
 import com.eviware.soapui.impl.rest.support.RestParameter
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle
 import com.eviware.soapui.impl.rest.support.RestUtils
 import com.eviware.soapui.impl.wsdl.WsdlProject
-import org.apache.xmlbeans.*
+import org.apache.xmlbeans.XmlBoolean
+import org.apache.xmlbeans.XmlDate
+import org.apache.xmlbeans.XmlDouble
+import org.apache.xmlbeans.XmlInteger
+import org.apache.xmlbeans.XmlString
 import org.raml.model.Action
 import org.raml.model.MimeType
 import org.raml.model.ParamType
@@ -31,48 +40,31 @@ import org.raml.model.Resource
 import org.raml.model.Response
 import org.raml.model.parameter.AbstractParam
 import org.raml.model.parameter.UriParameter
-import org.raml.parser.loader.DefaultResourceLoader
-import org.raml.parser.loader.FileResourceLoader
-import org.raml.parser.tagresolver.ContextPath
 import org.raml.parser.visitor.RamlDocumentBuilder
 
 /**
  * A simple RAML importer that uses the raml-java-parser
- *
- * @author Ole Lensmar
  */
 
-class RamlImporter {
-
+class RamlV08Importer extends AbstractRamlImporter {
     private static final String MEDIA_TYPE_EXTENSION = "{mediaTypeExtension}"
-    private final WsdlProject project
+
     private String defaultMediaType
     private String defaultMediaTypeExtension
     private def baseUriParams = [:]
-    private RestMockService restMockService
-    private boolean createSampleRequests
 
-    public RamlImporter(WsdlProject project) {
-        this.project = project
-    }
-
-    public void setRestMockService( RestMockService restMockService )
-    {
-        this.restMockService = restMockService
+    public RamlV08Importer(WsdlProject project) {
+        super(project)
     }
 
     public RestService importRaml(String url) {
-
-
         Raml raml;
 
         def builder = new RamlDocumentBuilder()
-        if( url.toLowerCase().startsWith("file:"))
-        {
-            def parent = new File( url.substring(5)).getParentFile().toURI().toURL().toString()
-            raml = builder.build(new URL(url).openStream(), parent );
-        }
-        else {
+        if (url.toLowerCase().startsWith("file:")) {
+            def parent = new File(url.substring(5)).getParentFile().toURI().toURL().toString()
+            raml = builder.build(new URL(url).openStream(), parent);
+        } else {
             raml = builder.build(url);
         }
 
@@ -99,17 +91,17 @@ class RamlImporter {
         return service
     }
 
-    def addResource(RestService service, String path, Resource r ) {
+    private def addResource(RestService service, String path, Resource r) {
 
         def resource = service.addNewResource(getResourceName(r), path)
         initResource(resource, r)
 
         r.resources.each {
-           addChildResource(resource, it.key, it.value)
+            addChildResource(resource, it.key, it.value)
         }
     }
 
-    String getResourceName(Resource r) {
+    private String getResourceName(Resource r) {
         String name = r.displayName
 
         if (name == null)
@@ -121,7 +113,7 @@ class RamlImporter {
         return name
     }
 
-    def addChildResource(RestResource resource, String path, Resource r) {
+    private def addChildResource(RestResource resource, String path, Resource r) {
         def childResource = resource.addNewChildResource(getResourceName(r), path)
 
         initResource(childResource, r)
@@ -135,7 +127,7 @@ class RamlImporter {
         }
     }
 
-    def initResource(RestResource resource, Resource r ) {
+    private def initResource(RestResource resource, Resource r) {
 
         resource.description = r.description
 
@@ -146,15 +138,15 @@ class RamlImporter {
             p.defaultValue = "." + defaultMediaTypeExtension
         }
 
-        def params = extractUriParams(r.uri, r.uriParameters )
+        def params = extractUriParams(r.uri, r.uriParameters)
         params.putAll(baseUriParams)
         params.each {
-            addParamFromNamedProperty(resource.params, ParameterStyle.TEMPLATE, it.key, it.value )
+            addParamFromNamedProperty(resource.params, ParameterStyle.TEMPLATE, it.key, it.value)
         }
 
         // workaround for bug in SoapUI that adds template parameters to path
         baseUriParams.each {
-            resource.path = resource.path.replaceAll( "\\{" + it.key + "\\}", "");
+            resource.path = resource.path.replaceAll("\\{" + it.key + "\\}", "");
         }
 
         r.actions.each {
@@ -162,17 +154,17 @@ class RamlImporter {
             def key = it.key.toString()
             if (Arrays.asList(RestRequestInterface.HttpMethod.methodsAsStringArray).contains(key)) {
                 def method = resource.getRestMethodByName(key)
-                if (method == null ) {
+                if (method == null) {
                     method = resource.addNewMethod(key.toLowerCase())
                     method.method = RestRequestInterface.HttpMethod.valueOf(key.toUpperCase())
                 }
 
-                initMethod(method, it.value )
+                initMethod(method, it.value)
             }
         }
     }
 
-    public void initMethod( RestMethod method, Action action ) {
+    private void initMethod(RestMethod method, Action action) {
 
         method.description = action.description
 
@@ -184,22 +176,19 @@ class RamlImporter {
             addParamFromNamedProperty(method.params, ParameterStyle.HEADER, it.key, it.value)
         }
 
-        if( action.body != null )
+        if (action.body != null)
             addRequestBody(method, action.body)
 
-        if( action.responses != null)
-            addResponses(method, action.responses )
+        if (action.responses != null)
+            addResponses(method, action.responses)
 
-        if (method.requestCount == 0 && createSampleRequests )
-        {
-            initDefaultRequest( method.addNewRequest("Request 1"))
+        if (method.requestCount == 0 && createSampleRequests) {
+            initDefaultRequest(method.addNewRequest("Request 1"))
         }
     }
 
-    RestRequest initDefaultRequest(RestRequest request)
-    {
-        if( defaultMediaType != null )
-        {
+    private RestRequest initDefaultRequest(RestRequest request) {
+        if (defaultMediaType != null) {
             def headers = request.requestHeaders
             headers.Accept = [defaultMediaType]
             request.requestHeaders = headers
@@ -218,41 +207,41 @@ class RamlImporter {
                     rep.mediaType.equals("multipart/form-data")) {
                 mt.formParameters?.each {
                     def name = it.key
-                    if( it.value.size() > 0 )
+                    if (it.value.size() > 0)
                         addParamFromNamedProperty(method.params, ParameterStyle.QUERY, name, it.value.get(0))
                 }
             }
 
             rep.sampleContent = mt.example
 
-            if (mt.example != null && createSampleRequests ) {
-                def request = initDefaultRequest( method.addNewRequest("Sample Request"))
+            if (mt.example != null && createSampleRequests) {
+                def request = initDefaultRequest(method.addNewRequest("Sample Request"))
                 request.mediaType = mt.type
                 request.requestContent = mt.example
             }
         }
     }
 
-    private RestParameter addParamFromNamedProperty(def params, def style, def name, AbstractParam p ) {
+    private RestParameter addParamFromNamedProperty(def params, def style, def name, AbstractParam p) {
 
-        RestParameter param = params.getProperty( name )
-        if( param == null )
-           param = params.addProperty(name)
+        RestParameter param = params.getProperty(name)
+        if (param == null)
+            param = params.addProperty(name)
 
         param.style = style
 
-        if( param.description == null || param.description == "" )
+        if (param.description == null || param.description == "")
             param.description = p.description
 
-        if( param.defaultValue == null || param.defaultValue == "")
+        if (param.defaultValue == null || param.defaultValue == "")
             param.defaultValue = p.defaultValue
 
         param.required = p.required
 
-        if( param.options == null || param.options.length == 0 )
+        if (param.options == null || param.options.length == 0)
             param.options = p.enumeration
 
-        if( param.type == null )
+        if (param.type == null)
             param.type = XmlString.type.name
 
         switch (p.type) {
@@ -315,12 +304,11 @@ class RamlImporter {
 
             params.each {
                 RestParameter p = it.value
-                if( p.style == ParameterStyle.TEMPLATE )
-                {
-                    if( p.defaultValue != null && p.defaultValue.trim().length() > 0 )
-                        path = path.replaceAll( "\\{" + it.key + "\\}", p.defaultValue )
+                if (p.style == ParameterStyle.TEMPLATE) {
+                    if (p.defaultValue != null && p.defaultValue.trim().length() > 0)
+                        path = path.replaceAll("\\{" + it.key + "\\}", p.defaultValue)
                     else
-                        path = path.replaceAll( "\\{" + it.key + "\\}", it.key )
+                        path = path.replaceAll("\\{" + it.key + "\\}", it.key)
                 }
             }
 
@@ -333,10 +321,10 @@ class RamlImporter {
 
                 r.body?.each {
                     def mockResponse = mockAction.addNewMockResponse("Response " + statusCode)
-                    mockResponse.setContentType( it.value.type )
+                    mockResponse.setContentType(it.value.type)
 
-                    if( it.value.example != null )
-                        mockResponse.responseContent = String.valueOf( it.value.example )
+                    if (it.value.example != null)
+                        mockResponse.responseContent = String.valueOf(it.value.example)
                 }
             }
 
@@ -380,10 +368,5 @@ class RamlImporter {
         }
 
         return uriParams
-    }
-
-    public void setCreateSampleRequests ( boolean createSampleRequests )
-    {
-        this.createSampleRequests = createSampleRequests;
     }
 }
