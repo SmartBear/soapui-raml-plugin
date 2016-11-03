@@ -326,6 +326,7 @@ class RamlV10Importer extends AbstractRamlImporter {
 
     private RestService createRestService(Api api) {
         RestService restService = project.addNewInterface(api.title().value(), RestServiceFactory.REST_TYPE)
+        restService.description = api.description()?.value()
 
         def path = api.baseUri().value()
         if (path != null) {
