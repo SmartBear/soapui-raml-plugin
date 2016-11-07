@@ -1,6 +1,6 @@
 package com.smartbear.soapui.raml
 
-import com.eviware.soapui.SoapUI
+import com.eviware.soapui.impl.actions.UnsupportedDefinitionException
 import com.eviware.soapui.impl.rest.RestMethod
 import com.eviware.soapui.impl.rest.RestRepresentation
 import com.eviware.soapui.impl.rest.RestRequest
@@ -47,11 +47,15 @@ class RamlV10Importer extends AbstractRamlImporter {
     public RestService importRaml(String url) {
         RamlModelResult ramlModelResult = new RamlModelBuilder().buildApi(url)
         if (ramlModelResult.hasErrors()) {
+            StringBuilder message = new StringBuilder()
             ramlModelResult.getValidationResults().each {
-                SoapUI.log.error(it.getMessage())
+                //SoapUI.log.error(it.getMessage())
+                if (message.length() > 0) {
+                    message.append(System.lineSeparator())
+                }
+                message.append(it.getMessage())
             }
-
-            return null
+            throw new UnsupportedDefinitionException(message.toString())
         }
 
         return importRaml(ramlModelResult.apiV10)
