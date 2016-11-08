@@ -23,7 +23,7 @@ class RamlUtils {
             SoapUI.log(String.format(RAML_VERSION_MESSAGE, "1.0"));
             return new RamlV10Importer(project);
         }
-
-        throw new Exception("Unable to determine the RAML version.");
+        
+        throw new Exception("Unable to determine the RAML version. The first line of a RAML API definition document must begin with the text #%RAML 0.8 or #%RAML 1.0");
     }
 }

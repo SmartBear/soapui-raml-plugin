@@ -49,7 +49,6 @@ class RamlV10Importer extends AbstractRamlImporter {
         if (ramlModelResult.hasErrors()) {
             StringBuilder message = new StringBuilder()
             ramlModelResult.getValidationResults().each {
-                //SoapUI.log.error(it.getMessage())
                 if (message.length() > 0) {
                     message.append(System.lineSeparator())
                 }
