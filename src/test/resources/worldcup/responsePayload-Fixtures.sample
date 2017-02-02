@@ -1,0 +1,20 @@
+[
+  {
+    "country":"brazil",
+      {
+        "date":"6/11/2014",
+        "time":"1300 GMT",
+        "opponent":"croatia"
+      }
+      {
+        "date":"6/17/2014",
+        "time":"1300 GMT",
+        "opponent":"mexico"
+      }
+      {
+        "date":"6/23/2014",
+        "time":"1300 GMT",
+        "opponent":"chile"
+      }
+  }
+]

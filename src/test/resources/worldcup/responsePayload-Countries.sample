@@ -1,0 +1,30 @@
+[
+  {
+    "countryID":"1",
+    "countryName":"brazil",
+    "group":"A",
+    "FIFA rank":"2",
+    "titles":"4"
+  }
+  {
+    "countryID":"2",
+    "countryName":"england",
+    "group":"B",
+    "FIFA rank":"9",
+    "titles":"1"
+  }
+  {
+    "countryID":"3",
+    "countryName":"portugal",
+    "group":"C",
+    "FIFA rank":"7",
+    "titles":"0"
+  }
+  {
+    "countryID":"4",
+    "countryName":"argentina",
+    "group":"D",
+    "FIFA rank":"5",
+    "titles":"2"
+  }
+]

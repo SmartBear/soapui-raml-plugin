@@ -1,7 +1,10 @@
 #%RAML 0.8
 title: Mythical Logistics Inc Shipping API
 version: 1.0
-baseUri: http://mythical.cloudhub.io/api/b2bshipping/{version}
+baseUri: http://{hostName}.cloudhub.io/api/b2bshipping/{version}
+baseUriParameters:
+  hostName:
+    enum: ["api", "api-dev"]
 documentation: 
   - title: Mythical Logistics Shipping Quote and Shipment API Documentation
     content: Use this API to 1) get shipping quotes for your shipments from mobile or web apps 2) initiate shipment requests from quote (premium account holders must provide the corporate account number) and 3) track the status of a shipment
@@ -104,6 +107,12 @@ mediaType: application/json
   /{shipment_id}:
     get:
       description: Get shipment status and Tracking information
+      baseUriParameters:
+        "shipment_id":
+          type: string
+          required: true
+          repeat: false
+          default: "someid"
       responses:
         200:
           body:

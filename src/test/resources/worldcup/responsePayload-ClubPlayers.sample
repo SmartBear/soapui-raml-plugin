@@ -1,0 +1,29 @@
+[
+  {
+    "playerId":"1",
+    "playerName":"Cristiano Ronaldo",
+    "position":"Midfield",
+    "country":"Portugal",
+    "club":"Real Madrid",
+    "starIndex":"99",
+    "goals":"36"
+  }
+  {
+    "playerId":"63",
+    "playerName":"Iker Cassillas",
+    "position":"Goalie",
+    "country":"Spain",
+    "club":"Real Madrid",
+    "starindex":"75",
+    "goals":"0"
+  }
+  {
+    "playerId":"45",
+    "playerName":"Kareem Benzema",
+    "position":"Striker",
+    "country":"France",
+    "club":"Real Madrid",
+    "starIndex":"78",
+    "goals":"14"
+  }
+] 

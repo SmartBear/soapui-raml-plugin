@@ -1,0 +1,29 @@
+[
+  {
+    "playerId":"1",
+    "playerName":"Cristiano Ronaldo",
+    "position":"Midfield",
+    "country":"Portugal",
+    "club":"Real Madrid",
+    "starIndex":"99",
+    "goals":"36"
+  }
+  {
+    "playerId":"2",
+    "playerName":"Steven Gerrard",
+    "position":"Midfield",
+    "country":"England",
+    "club":"Liverpool",
+    "starindex":"84",
+    "goals":"19"
+  }
+  {
+    "playerId":"3",
+    "playerName":"Neymar",
+    "position":"Striker",
+    "country":"Brazil",
+    "club":"FC Barcelona",
+    "starIndex":"98",
+    "goals":"4"
+  }
+] 

@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2014 SmartBear Software, Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.smartbear.soapui.raml
 
 import com.eviware.soapui.impl.rest.RestMethod
@@ -24,10 +40,16 @@ import org.raml.model.parameter.UriParameter
 class RamlExporter {
 
     private final WsdlProject project
+    private final String defaultMediaType
     private boolean createSampleBodies
 
-    public RamlExporter( WsdlProject project ) {
+    public RamlExporter( WsdlProject project, String defaultMediaType ) {
         this.project = project
+        this.defaultMediaType = defaultMediaType
+    }
+
+    public RamlExporter( WsdlProject project ) {
+        this(project, "application/json")
     }
 
     String createRaml(String title, RestService service, String baseUri, String version ) {
@@ -147,17 +169,19 @@ class RamlExporter {
 
         restMethod.representations.each {
 
+            def mediaType = hasContent(it.mediaType) ? it.mediaType : defaultMediaType
+
             if( it.type == RestRepresentation.Type.REQUEST && (
                 restMethod.method == RestRequestInterface.HttpMethod.POST ||
                 restMethod.method == RestRequestInterface.HttpMethod.PUT ))
             {
-                if( hasContent(it.mediaType)) {
-                    result.body.put(it.mediaType, new MimeType())
+                if( hasContent(mediaType)) {
+                    result.body.put(mediaType, new MimeType())
 
                     if( createSampleBodies )
                     {
                         restMethod.requestList.each {
-                            def mimeType = result.body.get( it.mediaType )
+                            def mimeType = result.body.get( mediaType )
                             if( mimeType != null && !hasContent(mimeType.example) && hasContent( it.requestContent ))
                             {
                                 mimeType.example = it.requestContent
@@ -168,10 +192,10 @@ class RamlExporter {
             }
             else if( it.type == RestRepresentation.Type.RESPONSE || it.type == RestRepresentation.Type.FAULT )
             {
-                if( hasContent( it.mediaType )) {
+                if( hasContent( mediaType )) {
                     Response response = new Response()
                     response.body = new HashMap<String, MimeType>()
-                    response.body.put(it.mediaType, new MimeType())
+                    response.body.put(mediaType, new MimeType())
 
                     it.status.each {
                         int statusCode = it
