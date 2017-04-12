@@ -164,7 +164,9 @@ class RamlV10Importer extends AbstractRamlImporter {
     }
 
     private void initMethod(RestMethod restMethod, Method method) {
-        restMethod.description = method.description().value()
+        if (method.description() != null) {
+            restMethod.description = method.description().value()
+        }
 
         method.queryParameters()?.each {
             addParamFromNamedProperty(restMethod.params, ParameterStyle.QUERY, new RamlParameter(it))
@@ -190,7 +192,7 @@ class RamlV10Importer extends AbstractRamlImporter {
     private RestRequest initDefaultRequest(RestRequest restRequest) {
         if (defaultMediaTypes != null) {
             def headers = restRequest.requestHeaders
-            headers.Accept = defaultMediaTypes.toArray()
+            headers.put("Accept", defaultMediaTypes)
             restRequest.requestHeaders = headers
         }
 
