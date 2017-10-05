@@ -48,7 +48,7 @@ class RamlUtils {
             params.put("SourceModule", "");
             params.put("ProductArea", "MainMenu");
             params.put("Type", "REST");
-            params.put("Source", "RamlCollection");
+            params.put("Source", "RamlDefinition");
             trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
                     action, params);
         } catch (Throwable e) {
