@@ -11,7 +11,7 @@
 ### Download & Install
 
 As of the 1.2 version the plugin is only available via the Plugin Repository / Plugin Manager button in top 
-toolbars of either SoapUI Pro 5.1+ or Ready! API 1.0+
+toolbars of either SoapUI Pro 5.1+ or ReadyAPI 1.0+
 
 ### Build it yourself
 
