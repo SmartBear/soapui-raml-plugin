@@ -2,7 +2,6 @@ package com.smartbear.soapui.raml
 
 import com.eviware.soapui.SoapUI
 import com.eviware.soapui.impl.wsdl.WsdlProject
-import com.smartbear.analytics.AnalyticsManager
 import org.apache.log4j.Logger
 
 import java.lang.reflect.Method
@@ -49,7 +48,7 @@ class RamlUtils {
             params.put("SourceModule", "");
             params.put("ProductArea", "MainMenu");
             params.put("Type", "REST");
-            params.put("Source", "PostmanCollection");
+            params.put("Source", "RamlCollection");
             trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
                     action, params);
         } catch (Throwable e) {
