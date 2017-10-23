@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import static com.smartbear.soapui.raml.RamlUtils.sendAnalytics;
+
 public class RamlImporterWorker extends Worker.WorkerAdapter {
     private final String finalExpUrl;
     private WsdlProject project;
@@ -62,7 +64,7 @@ public class RamlImporterWorker extends Worker.WorkerAdapter {
             }
 
             UISupport.select(restService);
-            Analytics.trackAction("ImportRAML");
+            sendAnalytics("ImportRAML");
 
             return restService;
         } catch (Throwable e) {

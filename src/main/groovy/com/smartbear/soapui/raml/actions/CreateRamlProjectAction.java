@@ -15,8 +15,11 @@ import com.eviware.x.form.XFormFieldListener;
 import com.eviware.x.form.support.ADialogBuilder;
 import com.eviware.x.form.support.AField;
 import com.eviware.x.form.support.AForm;
+import com.smartbear.soapui.raml.RamlUtils;
 
 import java.io.File;
+
+import static com.smartbear.soapui.raml.RamlUtils.sendAnalytics;
 
 /**
  * Created by ole on 21/06/14.
@@ -66,7 +69,7 @@ public class CreateRamlProjectAction extends AbstractSoapUIAction<WorkspaceImpl>
                     XProgressDialog dlg = UISupport.getDialogs().createProgressDialog("Importing API", 0, "", false);
                     dlg.run(new RamlImporterWorker(expUrl, project, dialog));
 
-                    Analytics.trackAction("CreateRAMLProject");
+                    sendAnalytics("CreateRAMLProject");
 
                     break;
                 }
