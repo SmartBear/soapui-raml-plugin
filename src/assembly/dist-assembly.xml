@@ -14,6 +14,7 @@
                 <include>org.yaml:snakeyaml</include>
                 <include>com.googlecode.juniversalchardet:juniversalchardet</include>
                 <include>org.glassfish:javax.json</include>
+                <include>org.raml:yagi</include>
             </includes>
         </dependencySet>
         <dependencySet>
