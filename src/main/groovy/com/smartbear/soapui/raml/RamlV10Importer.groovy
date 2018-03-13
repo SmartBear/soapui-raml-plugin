@@ -63,7 +63,8 @@ class RamlV10Importer extends AbstractRamlImporter {
     public RestService importRaml(Api api) {
         def restService = createRestService(api)
 
-        baseUriParams = extractUriParams(api.baseUri().value(), api.baseUriParameters())
+        def path = api.baseUri() != null ? api.baseUri().value() : null
+        baseUriParams = extractUriParams(path, api.baseUriParameters())
         if (baseUriParams.version != null) {
             baseUriParams.version.defaultValue = api.version()?.value()
         }
@@ -333,8 +334,9 @@ class RamlV10Importer extends AbstractRamlImporter {
         RestService restService = project.addNewInterface(api.title().value(), RestServiceFactory.REST_TYPE)
         restService.description = api.description()?.value()
 
-        def path = api.baseUri().value()
-        if (path != null) {
+
+        if (api.baseUri() != null && api.baseUri().value() != null) {
+            def path = api.baseUri().value()
             if (path.endsWith("/")) {
                 path = path.substring(0, path.length() - 1)
             }
