@@ -88,7 +88,7 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
         @AField( name = "Generate Virt", description = "Generate a REST Mock Service from the RAML definition", type = AField.AFieldType.BOOLEAN )
         public final static String GENERATE_MOCK = "Generate Virt";
 
-        @AField( name = "Generate TestSuite", description = "Generate a skeleton TestSuite for the created REST API", type = AField.AFieldType.BOOLEAN )
-        public final static String GENERATE_TESTSUITE = "Generate TestSuite";
+        @AField( name = "Generate Test Suite", description = "Generate a skeleton Test Suite for the created REST API", type = AField.AFieldType.BOOLEAN )
+        public final static String GENERATE_TESTSUITE = "Generate Test Suite";
     }
 }
