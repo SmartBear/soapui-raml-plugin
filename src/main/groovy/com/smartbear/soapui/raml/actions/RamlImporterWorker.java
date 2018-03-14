@@ -78,7 +78,7 @@ public class RamlImporterWorker extends Worker.WorkerAdapter {
         for (RestResource resource : service.getAllResources()) {
 
             WsdlTestCase testCase = testSuite.addNewTestCase(resource.getName() + " TestCase");
-            testCase.setDescription("TestCase generated for REST Resource [" + resource.getName() + "] located at ["
+            testCase.setDescription("Test Case generated for REST Resource [" + resource.getName() + "] located at ["
                     + resource.getFullPath(false) + "]");
 
             if (resource.getRequestCount() > 0) {
