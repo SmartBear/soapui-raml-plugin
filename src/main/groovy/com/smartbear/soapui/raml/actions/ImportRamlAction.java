@@ -29,6 +29,7 @@ import com.eviware.x.form.support.AField;
 import com.eviware.x.form.support.AField.AFieldType;
 import com.eviware.x.form.support.AForm;
 
+import javax.swing.JDialog;
 import java.io.File;
 
 /**
@@ -40,6 +41,7 @@ import java.io.File;
 @ActionConfiguration( actionGroup = "EnabledWsdlProjectActions", afterAction = "AddWadlAction" )
 public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
     private XFormDialog dialog;
+    private JDialog owner;
 
     public ImportRamlAction() {
         super("Import RAML Definition", "Imports a RAML definition into SoapUI");
@@ -48,7 +50,7 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
     public void perform(final WsdlProject project, Object param) {
         // initialize form
         if (dialog == null) {
-            dialog = ADialogBuilder.buildDialog(Form.class);
+            dialog = ADialogBuilder.buildDialog(Form.class, null, null, owner);
             dialog.setBooleanValue( Form.CREATE_REQUESTS, true );
         } else {
             dialog.setValue(Form.RAML_URL, "");
@@ -75,6 +77,10 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
                 UISupport.showErrorMessage(ex);
             }
         }
+    }
+
+    public void setOwner(JDialog owner) {
+        this.owner = owner;
     }
 
     @AForm(name = "Add RAML Definition", description = "Creates a REST API from the specified RAML definition")
