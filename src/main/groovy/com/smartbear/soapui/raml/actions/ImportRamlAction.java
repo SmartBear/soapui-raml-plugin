@@ -16,24 +16,20 @@
 
 package com.smartbear.soapui.raml.actions;
 
-import com.eviware.soapui.SoapUI;
-import com.eviware.soapui.impl.rest.RestService;
-import com.eviware.soapui.impl.rest.mock.RestMockService;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.support.PathUtils;
+import com.eviware.soapui.plugins.ActionConfiguration;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.action.support.AbstractSoapUIAction;
-import com.eviware.x.dialogs.Worker;
 import com.eviware.x.dialogs.XProgressDialog;
-import com.eviware.x.dialogs.XProgressMonitor;
 import com.eviware.x.form.XFormDialog;
 import com.eviware.x.form.support.ADialogBuilder;
 import com.eviware.x.form.support.AField;
 import com.eviware.x.form.support.AField.AFieldType;
 import com.eviware.x.form.support.AForm;
-import com.smartbear.soapui.raml.RamlImporter;
 
+import javax.swing.JDialog;
 import java.io.File;
 
 /**
@@ -42,8 +38,10 @@ import java.io.File;
  * @author Ole Lensmar
  */
 
+@ActionConfiguration( actionGroup = "EnabledWsdlProjectActions", afterAction = "AddWadlAction" )
 public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
     private XFormDialog dialog;
+    private JDialog owner;
 
     public ImportRamlAction() {
         super("Import RAML Definition", "Imports a RAML definition into SoapUI");
@@ -52,12 +50,11 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
     public void perform(final WsdlProject project, Object param) {
         // initialize form
         if (dialog == null) {
-            dialog = ADialogBuilder.buildDialog(Form.class);
+            dialog = ADialogBuilder.buildDialog(Form.class, null, null, owner);
             dialog.setBooleanValue( Form.CREATE_REQUESTS, true );
         } else {
             dialog.setValue(Form.RAML_URL, "");
         }
-
 
         while (dialog.show()) {
             try {
@@ -72,39 +69,7 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
                         expUrl = new File(expUrl).toURI().toURL().toString();
 
                     XProgressDialog dlg = UISupport.getDialogs().createProgressDialog("Importing API", 0, "", false);
-                    final String finalExpUrl = expUrl;
-                    dlg.run(new Worker.WorkerAdapter() {
-                        public Object construct(XProgressMonitor monitor) {
-
-                            try {
-                                // create the importer and import!
-                                RamlImporter importer = new RamlImporter(project);
-                                importer.setCreateSampleRequests( dialog.getBooleanValue(Form.CREATE_REQUESTS));
-                                SoapUI.log( "Importing RAML from [" + finalExpUrl + "]");
-                                SoapUI.log( "CWD:" + new File(".").getCanonicalPath());
-                                RestMockService mockService = null;
-
-                                if( dialog.getBooleanValue( Form.GENERATE_MOCK ))
-                                {
-                                    mockService = project.addNewRestMockService( "Generated MockService" );
-                                    importer.setRestMockService( mockService );
-                                }
-
-                                RestService restService = importer.importRaml(finalExpUrl);
-
-                                if( mockService != null )
-                                    mockService.setName( restService.getName() + " MockService" );
-
-                                UISupport.select(restService);
-
-                                return restService;
-                            } catch (Exception e) {
-                                SoapUI.logError(e);
-                            }
-
-                            return null;
-                        }
-                    });
+                    dlg.run(new RamlImporterWorker(expUrl, project, dialog));
 
                     break;
                 }
@@ -112,6 +77,10 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
                 UISupport.showErrorMessage(ex);
             }
         }
+    }
+
+    public void setOwner(JDialog owner) {
+        this.owner = owner;
     }
 
     @AForm(name = "Add RAML Definition", description = "Creates a REST API from the specified RAML definition")
@@ -122,8 +91,10 @@ public class ImportRamlAction extends AbstractSoapUIAction<WsdlProject> {
         @AField(name = "Create Requests", description = "Create sample requests for imported methods", type = AFieldType.BOOLEAN)
         public final static String CREATE_REQUESTS = "Create Requests";
 
-        @AField( name = "Generate MockService", description = "Generate a REST Mock Service from the RAML definition", type = AField.AFieldType.BOOLEAN )
-        public final static String GENERATE_MOCK = "Generate MockService";
-    }
+        @AField( name = "Generate Virt", description = "Generate a REST Mock Service from the RAML definition", type = AField.AFieldType.BOOLEAN )
+        public final static String GENERATE_MOCK = "Generate Virt";
 
+        @AField( name = "Generate Test Suite", description = "Generate a skeleton Test Suite for the created REST API", type = AField.AFieldType.BOOLEAN )
+        public final static String GENERATE_TESTSUITE = "Generate Test Suite";
+    }
 }

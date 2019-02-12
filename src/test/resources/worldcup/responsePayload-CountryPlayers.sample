@@ -1,0 +1,29 @@
+[
+  {
+    "playerId":"13",
+    "playerName":"Lio Messi",
+    "position":"striker",
+    "country":"argentina",
+    "club":"FC Barcelona",
+    "starIndex":"99",
+    "goals":"34"
+  }
+  {
+    "playerId":"187",
+    "playerName":"Sergio kun Aguero",
+    "position":"striker",
+    "country":"argentina",
+    "club":"Man City",
+    "starindex":"86",
+    "goals":"12"
+  }
+  {
+    "playerId":"243",
+    "playerName":"Gonzalo Higuain",
+    "position":"Midfield",
+    "country":"argentina",
+    "club":"Napoli",
+    "starIndex":"55",
+    "goals":"6"
+  }
+]

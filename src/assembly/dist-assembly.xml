@@ -1,21 +1,25 @@
 <assembly>
     <id>dist</id>
     <formats>
-        <format>zip</format>
+        <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
             <unpack>false</unpack>
-            <outputDirectory>/ext</outputDirectory>
+            <outputDirectory>/lib</outputDirectory>
             <includes>
                 <include>org.raml:raml-parser</include>
+                <include>org.raml:raml-parser-2</include>
                 <include>org.yaml:snakeyaml</include>
+                <include>com.googlecode.juniversalchardet:juniversalchardet</include>
+                <include>org.glassfish:javax.json</include>
+                <include>org.raml:yagi</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <unpack>false</unpack>
-            <outputDirectory>/plugins</outputDirectory>
+            <unpack>true</unpack>
+            <outputDirectory>/</outputDirectory>
             <includes>
                 <include>com.smartbear:soapui-raml-plugin</include>
             </includes>
@@ -24,14 +28,14 @@
     <fileSets>
         <fileSet>
             <directory>${project.basedir}</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/META-INF</outputDirectory>
             <includes>
                 <include>LICENSE*</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/META-INF</outputDirectory>
             <includes>
                 <include>readme.txt</include>
             </includes>

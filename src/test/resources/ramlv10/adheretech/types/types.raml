@@ -1,0 +1,205 @@
+#%RAML 1.0 Library
+types:
+  Bottle:
+   properties:
+     bottleUid:
+       type: string
+       required: true
+     isActive?:
+       type: boolean
+     remindersActive?:
+       type: boolean
+     onBottleLights?:
+       type: boolean
+     onBottleSounds?:
+       type: boolean
+     doseOne?:
+       type: string
+     doseTwo?:
+       type: string
+     doseThree?:
+       type: string
+     feedbackActive?:
+       type: boolean
+     patientUid?:
+       type: string
+  BottleReading:
+     properties:
+       bottleReadingId:
+         type: integer
+         required: true
+       bottleUid:
+         type: string
+         required: true
+       checkinType:
+         type: string
+       recordedDatetime:
+         type: string
+         required: true
+       receivedDatetime?:
+         type: string
+         required: true
+       batteryLevel?:
+         type: integer
+       batteryStatus?:
+         type: string
+       cellServiceLevel?:
+         type: integer
+       cellServiceStatus?:
+         type: string
+  Dose:
+   properties:
+     patientUid:
+       type: string
+     bottleUid:
+       type: string
+     bottleReadingId?:
+       type: integer
+     reminderSent?:
+       type: boolean
+     doseStatus:
+       type: string
+     deadline?:
+       type: string
+     recordedDatetime:
+       type: string
+  Patient:
+   properties:
+     patientUid:
+       type: string
+     firstName?:
+       type: string
+     lastName?:
+       type: string
+     phoneNumber?:
+       type: string
+     contactMethod?:
+       type: string
+     emailAddress?:
+       type: string
+     caregiverPhoneNumber?:
+       type: string
+     caregiverContactMethod?:
+       type: string
+     caregiverEmailAddress?:
+       type: string
+     programName?:
+       type: string
+     timezone?:
+       type: string
+     defaultDose1?:
+       type: string
+     defaultDose2?:
+       type: string
+     defaultDose3?:
+       type: string
+     status?:
+       type: string
+     lastDose?:
+       type: string
+     adherence?:
+       type: number
+     adherence7Day?:
+       type: number
+     adherence30Day?:
+       type: number
+     bottleUids?:
+         type: string[]
+  User:
+   properties:
+     username:
+       type: string
+     emailAddress?:
+       type: string
+     roles?:
+       type: string[]
+  Program:
+   properties:
+     programId:
+       type: integer
+       format: int64
+     programName:
+       type: string
+     programDescription?:
+       type: string
+     startDate?:
+       type: date-only
+     endDate?:
+       type: date-only
+     patientUids?: string[]
+  FeedbackRequest:
+   properties:
+     feedbackId:
+       type: integer
+     patientUid:
+       type: string
+     bottleUid?:
+       type: string
+     feedbackProfileId:
+       type: integer
+     sendTime?:
+       type: datetime
+  EventSubscription:
+   properties:
+     subscriptionId:
+       type: string
+     eventType:
+       type: string
+     username:
+       type: string
+     callbackUrl:
+       type: string
+  Event:
+   properties:
+     eventId:
+       type: string
+     eventType:
+       type: string
+     timeOccurred:
+       type: datetime
+     patientUid?:
+       type: string
+     bottleUid?:
+       type: string
+     bottleReadingId?:
+       type: string
+  Alert:
+   properties:
+     alertId:
+       type: integer
+     alertType:
+       type: string
+     timeOccurred:
+       type: datetime
+     programName?:
+       type: string
+     patientUid?:
+       type: string
+     bottleUid?:
+       type: string
+     bottleReadingId?:
+       type: integer
+     priority?:
+       type: integer
+     state?:
+       type: string
+  SearchResult:
+   properties:
+     resultType:
+       type: string
+     resultUid:
+       type: string
+  Pause:
+   properties:
+     pauseId:
+       type: integer
+     patientUid:
+       type: string
+     status:
+       type: string
+     startdate:
+       type: datetime
+     enddate?:
+       type: datetime
+     reason?:
+       type: string
