@@ -2,12 +2,10 @@
 
 This repository contains source code for the RAML plugin for ReadyAPI. Use this plugin to:
 
-- Import RAML files to SoapUI to test your REST APIs
-- Generate a REST Mock Service for the RAML file being imported
-- Update an existing REST Service in SoapUI from a RAML file
-- Generate a RAML file for any REST API defined in SoapUI
-
-For detailed information, please visit the following page:<br/>[http://olensmar.blogspot.se/2013/12/a-raml-apihub-plugin-for-soapui.html](http://olensmar.blogspot.se/2013/12/a-raml-apihub-plugin-for-soapui.html).
+- Import RAML files to ReadyAPI to test your REST APIs
+- Generate a REST Virtual Service for the RAML file being imported
+- Update an existing REST Service in ReadyAPI from a RAML file
+- Generate a RAML file for any REST API defined in ReadyAPI
 
 ## Plugin info
 
@@ -30,6 +28,7 @@ To install the plugin:
 1. In ReadyAPI, switch to the Integrations tab.
 2. Find ReadyAPI Postman Plugin and click Install.
 3. Confirm that you want to download and install the plugin.
+
 ### Build it yourself
 
 Clone the Git repository, make sure you have Maven installed and execute the following command:
@@ -37,6 +36,8 @@ Clone the Git repository, make sure you have Maven installed and execute the fol
 ```
 mvn clean install assembly:single
 ```
+
+To learn how to install the plugin from a file in ReadyAPI, see [ReadyAPI documentation](https://support.smartbear.com/readyapi/docs/integrations/managing.html).
 
 ### Create a project
 
