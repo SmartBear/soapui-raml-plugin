@@ -7,7 +7,7 @@ import com.eviware.soapui.plugins.PluginConfiguration;
  * Created by ole on 08/06/14.
  */
 
-@PluginConfiguration( groupId = "com.smartbear.soapui.plugins", name = "RAML Plugin", version = "1.3.3",
+@PluginConfiguration( groupId = "com.smartbear.soapui.plugins", name = "RAML Plugin", version = "1.3.5",
     autoDetect = true, description = "Provides RAML import/export functionality and an ApiHub API browser",
     infoUrl = "https://github.com/olensmar/soapui-raml-plugin")
 public class PluginConfig extends PluginAdapter {
